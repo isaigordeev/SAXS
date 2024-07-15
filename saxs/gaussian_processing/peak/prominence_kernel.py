@@ -16,6 +16,7 @@ class ProminencePeakKernel(DefaultPeakKernel):
 
     def __init__(self, data_dir, file_analysis_dir,
                  is_preprocessing=True,
+                 is_postprocessing=True,
                  is_background_reduction=True,
                  is_filtering=True,
                  is_peak_processing=True,
@@ -23,6 +24,7 @@ class ProminencePeakKernel(DefaultPeakKernel):
         super().__init__(data_dir,
                          file_analysis_dir,
                          is_preprocessing,
+                         is_postprocessing,
                          is_background_reduction,
                          is_filtering,
                          is_peak_processing
@@ -45,7 +47,8 @@ class ProminencePeakKernel(DefaultPeakKernel):
         self.peaks, self.props = find_peaks(self.current_I_state, height=1, prominence=1)
         if len(self.props["right_bases"]) > 0:
             self.noisy_relevant_cut_point = self.props["right_bases"][0]
-        else: self.noisy_relevant_cut_point = 100
+        else:
+            self.noisy_relevant_cut_point = 100
 
     def filtering_decomposition(self):
         # noisy_part = np.ones(noisy_indice)
@@ -64,7 +67,8 @@ class ProminencePeakKernel(DefaultPeakKernel):
         self.peaks, self.props = find_peaks(self.current_I_state,
                                             height=height,
                                             prominence=prominence, distance=distance)
-        print(self.props)
+
+        # print(self.props)
 
         # print(self.props['left_bases'])
         # print(self.props['right_bases'])
@@ -76,7 +80,7 @@ class ProminencePeakKernel(DefaultPeakKernel):
     def custom_sample_postprocessing(self):
         pass
 
-        #background reduction
+        # background reduction
         # with open('without_back_res/{}'.format(self.filename), mode='w', newline='') as file:
         #     writer = csv.writer(file)
         #     writer.writerows(np.stack((self.current_q_state, self.current_I_state), axis=1))
@@ -103,6 +107,7 @@ class ProminencePeakKernel(DefaultPeakKernel):
             # 'loss_ratio': self.final_loss / self.start_loss
         }
 
+
 class SyntheticPeakKernel(ProminencePeakKernel):
     def __init__(self, data_dir,
                  is_preprocessing=False,
@@ -114,6 +119,7 @@ class SyntheticPeakKernel(ProminencePeakKernel):
                          is_background_reduction,
                          is_filtering,
                          )
+
 
 class RobustProminencePeak(ProminencePeakKernel):
     def __init__(self, data_dir,

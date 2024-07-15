@@ -3,7 +3,6 @@ import os
 
 import numpy as np
 
-
 from saxs.gaussian_processing.settings_processing import ANALYSE_DIR_SESSIONS, ANALYSE_DIR_SESSIONS_RESULTS
 
 
@@ -34,13 +33,14 @@ class AbstractPhaseKernel:
         self.preprocessed_q = self.analyzed_q / self.analyzed_q[0]
         self.preprocessed_q = self.preprocessed_q[1:]
 
-
     def phase_classification(self):
         # self.set_directories(sample_name)
         self.read_sample_data()
 
-        if len(self.analyzed_q) > 1:
-            
+        if self.analyzed_q is None:
+            return 'blanc'
+        elif len(self.analyzed_q) > 1:
+
             self.phase_processing()
 
             print("DIST ", self.distances)
@@ -55,6 +55,7 @@ class AbstractPhaseKernel:
         pass
 
     def read_sample_data(self):
-        self.analyzed_q = self.data[self.sample]['q']
-        self.analyzed_q = np.array(self.analyzed_q)
-
+        if self.data[self.sample]['q'] is not None:
+            self.analyzed_q = self.data[self.sample]['q']
+            self.analyzed_q = np.array(self.analyzed_q)
+        else: self.analyzed_q = None

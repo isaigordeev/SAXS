@@ -21,6 +21,7 @@ class AbstractPeakKernel:
                  'current_q_state',
                  'is_background_reduction',
                  'is_preprocessing',
+                 'is_postprocessing',
                  'is_filtering',
                  'popt_background',
                  'pcov_background',
@@ -54,6 +55,7 @@ class AbstractPeakKernel:
     def __init__(self, data_dir,
                  file_analysis_dir,
                  is_preprocessing=True,
+                 is_postprocessing=True,
                  is_background_reduction=True,
                  is_filtering=True,
                  is_peak_processing=True,
@@ -71,7 +73,7 @@ class AbstractPeakKernel:
         # print(self.q_raw)
 
         self.max_I = np.max(self.I_raw)
-        self.delta_q = (self.q_raw[np.size(self.q_raw)-1]-self.q_raw[0])/np.size(self.q_raw)
+        self.delta_q = (self.q_raw[np.size(self.q_raw) - 1] - self.q_raw[0]) / np.size(self.q_raw)
 
         self.I_background_filtered = None
         self.zero_level = np.zeros(len(self.q_raw))
@@ -83,6 +85,8 @@ class AbstractPeakKernel:
         self.current_q_state = self.q_raw
 
         self.is_preprocessing = is_preprocessing
+        self.is_postprocessing = is_postprocessing
+
         self.is_background_reduction = is_background_reduction
         self.is_filtering = is_filtering
 
@@ -92,7 +96,6 @@ class AbstractPeakKernel:
 
         self.str_type = 'abstract_kernel'
         self.short_str_type = 'abs_kern'
-
 
     def __call__(self, *args, **kwargs):
         self.custom_sample_preprocessing()
@@ -104,13 +107,11 @@ class AbstractPeakKernel:
         print(self.short_str_type)
         return ''.join(self.short_str_type)
 
-
     def custom_sample_postprocessing(self):
         pass
 
     def custom_sample_preprocessing(self):
         pass
-
 
     def current_state_plot(self):
         plt.clf()
@@ -122,7 +123,6 @@ class AbstractPeakKernel:
         plt.plot(self.current_q_state, self.current_I_state, label='starting_state')
         plt.legend()
         plt.savefig("{}/starting_state.pdf".format(self.file_analysis_dir))
-
 
     def raw_plot(self):
         plt.clf()
@@ -143,7 +143,8 @@ class AbstractPeakKernel:
     def final_plot(self):
         plt.clf()
         plt.plot(self.q_raw, self.I_raw, label='raw_plot')
-        plt.plot(self.q_raw[self.noisy_irrelevant_cut_point+self.peaks], self.I_raw[self.noisy_irrelevant_cut_point+self.peaks], 'rx', label='peaks_on_raw')
+        plt.plot(self.q_raw[self.noisy_irrelevant_cut_point + self.peaks],
+                 self.I_raw[self.noisy_irrelevant_cut_point + self.peaks], 'rx', label='peaks_on_raw')
         plt.plot(self.q_raw, self.zero_level, label='zero_level')
         plt.legend()
         plt.savefig("{}/final_plot.pdf".format(self.file_analysis_dir))
@@ -153,15 +154,15 @@ class AbstractPeakKernel:
         plt.plot(self.current_q_state[self.peaks], self.current_I_state[self.peaks], 'rx', label='peaks')
         plt.legend()
 
-
     def background_plot(self):
         plt.clf()
         if self.q_cut is not None and self.I_cut is not None:
             plt.plot(self.q_cut, self.I_cut, label='starting_state')
-        else: plt.plot(self.q_raw, self.I_raw, label='starting_state')
+        else:
+            plt.plot(self.q_raw, self.I_raw, label='starting_state')
         plt.plot(self.current_q_state, self.I_background_filtered, label='background_reduced')
         plt.plot(self.current_q_state, self.background, label='background')
-        plt.plot(self.current_q_state, self.background*BACKGROUND_COEF, label='background_moderated')
+        plt.plot(self.current_q_state, self.background * BACKGROUND_COEF, label='background_moderated')
 
         plt.plot(self.q_raw, self.zero_level, label='zero_level')
         plt.legend()
@@ -177,11 +178,11 @@ class AbstractPeakKernel:
 
         plt.savefig("{}/filtered_state.pdf".format(self.file_analysis_dir))
 
-
-
-
     def preprocessing(self):
         # self.I_filt = self.I_filt[i:]
+        pass
+
+    def postprocessing(self):
         pass
 
     def filtering(self):
@@ -218,19 +219,5 @@ class AbstractPeakKernel:
             self.peaks_plots()
             self.final_plot()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        if self.is_postprocessing:
+            self.postprocessing()

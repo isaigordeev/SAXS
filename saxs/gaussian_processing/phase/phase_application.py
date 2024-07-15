@@ -89,14 +89,16 @@ class PhaseApplication(ApplicationClassificator):
         self.samples = self.data.keys()
         for sample in self.samples:
             # sample = '{}{}'.format(sample_name, sample_ext)
-            print(id(self.data), 'class')
-            phase_classificator = self.kernel(
-                sample,
-                self.data,
-                self.phases_dict,
-                self.phases_coefficients
-            )
+            # print(id(self.data), 'class')
+            try:
+                phase_classificator = self.kernel(
+                    sample,
+                    self.data,
+                    self.phases_dict,
+                    self.phases_coefficients
+                )
 
-            self.data[sample]['predicted_phase'] = phase_classificator()
-
+                self.data[sample]['predicted_phase'] = phase_classificator()
+            except:
+                self.data[sample]['predicted_phase'] = "error"
         self.write_phase_data()
