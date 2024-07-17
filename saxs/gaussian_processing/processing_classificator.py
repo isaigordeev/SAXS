@@ -78,7 +78,7 @@ class Application(AbstractApplication):
 
 
 @dataclass
-class ApplicationClassificator(Application):
+class ApplicationClassificator(Application): #TODO another abstract class for classificator application
     # _data_directory = None
 
     def __init__(self, data_directory):
