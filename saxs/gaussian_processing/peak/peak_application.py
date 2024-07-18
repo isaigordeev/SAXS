@@ -22,6 +22,7 @@ class PeakApplication(ApplicationClassificator):
                  ):
         super().__init__(data_directory)
 
+        self.peak_classificator = None
         self.kernel = kernel
         self.file_analysis_dir_peaks = None
         self.file_analysis_dir = None
@@ -55,7 +56,7 @@ class PeakApplication(ApplicationClassificator):
             self.set_output_peak_directories(sample)
 
             try:
-                peak_classificator = self.kernel(
+                self.peak_classificator = self.kernel(
                     os.path.join(self.data_directory, sample),
                     self.file_analysis_dir,
                     self.is_peak_processing,
@@ -64,7 +65,7 @@ class PeakApplication(ApplicationClassificator):
                     self.is_peak_processing)
 
                 print(sample)
-                self.data[sample] = peak_classificator()
+                self.data[sample] = self.peak_classificator()
             except:
                 self.data[sample] = {'error': None}
 
