@@ -35,8 +35,8 @@ class Manager(ApplicationManager):
         self.phase_data_directory = self._default_peak_data_path if phase_data_directory is None else phase_data_directory
 
     def __call__(self):
-        a = PeakApplication(self.peak_data_directory, self.peak_kernel)
-        a.peak_classification()
+        self.peak_application_instance = PeakApplication(self.peak_data_directory, self.peak_kernel)
+        self.peak_application_instance.peak_classification_run()
 
-        b = PhaseApplication(self.phase_data_directory, self.phase_kernel)
-        b.phase_classification()
+        self.phase_application_instance = PhaseApplication(self.phase_data_directory, self.phase_kernel)
+        self.phase_application_instance.phase_classification_run()

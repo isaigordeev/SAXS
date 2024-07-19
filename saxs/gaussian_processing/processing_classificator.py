@@ -46,7 +46,7 @@ class Application(AbstractApplication):
         self.set_output_directories()
 
         Application._default_peak_data_path = os.path.join(self._current_results_dir_session,
-                                               '{}.json'.format(self.current_time))
+                                                           '{}.json'.format(self.current_time))
 
     def set_output_directories(self):
 
@@ -57,7 +57,6 @@ class Application(AbstractApplication):
 
         if Application._results_dir is None:
             raise NotADirectoryError("Root output directory error")
-
 
         Application._result_plots_dir = os.path.join(Application._results_dir, ANALYSE_DIR_SESSIONS)
         # print(Application._result_plots_dir)
@@ -75,15 +74,13 @@ class Application(AbstractApplication):
             os.mkdir(Application._current_results_dir_session)
 
 
-
-
 @dataclass
-class ApplicationClassificator(Application): #TODO another abstract class for classificator application
+class ApplicationClassificator(Application):  # TODO another abstract class for classificator application
     # _data_directory = None
 
     def __init__(self, data_directory):
         assert data_directory is not None
-        super().__init__(None, None)
+        super().__init__(None, None)  # it is bad
 
         self.data = {}
         self.data_directory = data_directory

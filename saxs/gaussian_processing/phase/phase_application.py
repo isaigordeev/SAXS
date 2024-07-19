@@ -41,7 +41,6 @@ class PhaseApplication(ApplicationClassificator):
         self.phases_directory = phases_directory
         self.kernel = kernel
 
-        print(self.data_directory)
         # filepath, extension = os.path.split(data_directory)
         # assert extension == '.json'
 
@@ -69,8 +68,6 @@ class PhaseApplication(ApplicationClassificator):
         for i, phase in enumerate(self.phases.keys()):
             self.phases_dict[i] = phase
 
-        # print(self.phases_coefficients)
-        # print(self.phases_dict)
 
     def load_peak_data(self):
 
@@ -84,7 +81,7 @@ class PhaseApplication(ApplicationClassificator):
         with open(self.data_directory, 'w') as f:
             json.dump(self.data, f, indent=4, separators=(",", ": "))
 
-    def phase_classification(self):
+    def phase_classification_run(self):
 
         self.samples = self.data.keys()
         for sample in self.samples:

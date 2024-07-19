@@ -174,6 +174,7 @@ class RobustParabolePeakKernel(ParabolePeakKernel):
         cls.str_type = "RobustParabolePeakKernel"
 
     def gaussian_sum(self, x, *params):
+        assert len(params) % 3 == 0
         y = np.zeros_like(x)
         number = 0
         for i in range(0, len(params), 3):
@@ -183,7 +184,9 @@ class RobustParabolePeakKernel(ParabolePeakKernel):
             number += 1
         return y
 
-    def sum_total_fit(self):
+    # def gaussian_sum_and_background(self, x, *params):
+
+    def sum_gaussian_total_fit(self):
         if len(self.peaks) != 0 and len(self.peak_params) != 0:
 
             def loss_function(params):
@@ -205,7 +208,7 @@ class RobustParabolePeakKernel(ParabolePeakKernel):
 
     def postprocessing(self):
         # print(self.peak_params)
-        self.sum_total_fit()
+        self.sum_gaussian_total_fit()
 
     def gathering(self) -> dict:
         peak_number = len(self.peaks) if self.peaks is not None else -1

@@ -50,7 +50,7 @@ class PeakApplication(ApplicationClassificator):
                   'w') as f:
             json.dump(self.data, f, indent=4, separators=(",", ": "))
 
-    def peak_classification(self):
+    def peak_classification_run(self):
         for sample_name, sample_ext in self.samples:
             sample = '{}{}'.format(sample_name, sample_ext)
             self.set_output_peak_directories(sample)

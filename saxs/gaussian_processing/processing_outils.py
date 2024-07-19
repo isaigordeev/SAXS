@@ -7,11 +7,13 @@ import csv
 from scipy.ndimage import gaussian_filter
 from scipy.optimize import curve_fit
 
+
 def get_filenames(folder_path):
     for filename in os.listdir(folder_path):
         if os.path.isfile(os.path.join(folder_path, filename)):
             if (filename != '.DS_Store'):
                 yield filename
+
 
 def get_filenames_without_ext(folder_path):
     for filename in os.listdir(folder_path):
@@ -24,7 +26,7 @@ def get_filenames_without_ext(folder_path):
 def load_generated_data(phase):
     data = np.load(f'../saxs_generated_data/P_{phase.lower()}.npy')
     print(data.shape)
-    data_3d = data[:,:,:,0]
+    data_3d = data[:, :, :, 0]
     data_1d = []
     for i in data_3d:
         # get matrix diagonal
@@ -37,10 +39,11 @@ def load_generated_data(phase):
     exp_data = None
     return data_1d, data_3d, exp_data, q
 
+
 def write_generated_data_to_csv(q, I, filename):
     csv_file = filename
 
-    data = np.array([q,I], dtype=object)
+    data = np.array([q, I], dtype=object)
     data = np.transpose(data)
     with open(csv_file, 'w', newline='') as file:
         writer = csv.writer(file)
@@ -48,7 +51,6 @@ def write_generated_data_to_csv(q, I, filename):
         writer.writerows(data)
 
     print(f'Data written to {csv_file} successfully.')
-
 
 
 def read_data(data_dir_file):
@@ -70,7 +72,7 @@ def read_data(data_dir_file):
             return q, I, None
         else:
             raise AttributeError("Input is insufficient")
-    elif extension == '.npy':  #synthetic test_processing_data
+    elif extension == '.npy':  # synthetic test_processing_data
         assert "processed" in data_dir_file
         data = np.load(data_dir_file)
         data_3d = data[:, :, :, 0]
@@ -88,8 +90,6 @@ def read_data(data_dir_file):
         return q, I[0], None
 
 
-
-
 def read_I(data_dir_file, EXTENSION):
     data = pd.read_csv(data_dir_file + EXTENSION, sep=',')
     data = data.apply(pd.to_numeric, errors='coerce')
@@ -97,24 +97,26 @@ def read_I(data_dir_file, EXTENSION):
     I = np.array(data.iloc[:, 0])
     return I
 
+
 def background_plot(q, I):
     plt.clf()
-    plt.plot(q, I,'bo', linewidth=0.5,  label='raw_data')
+    plt.plot(q, I, 'bo', linewidth=0.5, label='raw_data')
     plt.show()
     # plt.savefig('1')
 
 
 def calculate_absolute_difference(sequence, target):
     sequence = sequence[:len(target)]
-    absolute_difference = np.sum([1/abs(x-y) for x,y in zip(sequence,target)])
+    absolute_difference = np.sum([1 / abs(x - y) for x, y in zip(sequence, target)])
     return absolute_difference
+
 
 def calculate_first_peaks(sequence, target):
     if len(target) > 0:
         sequence = sequence[:len(target)]
-        absolute_difference = abs(sequence[0]-target[0])
-        return 1/absolute_difference
-    else: 
+        absolute_difference = abs(sequence[0] - target[0])
+        return 1 / absolute_difference
+    else:
         print("Can not be classified")
         return None
 
