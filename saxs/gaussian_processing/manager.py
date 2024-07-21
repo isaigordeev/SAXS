@@ -20,7 +20,7 @@ now = datetime.now()
 today = now.today().date()
 
 
-class Manager(ApplicationManager):
+class DirectoryManager(ApplicationManager):
     def __init__(self,
                  peak_data_directory='test_processing_data/',
                  phase_data_directory=None,
@@ -39,4 +39,25 @@ class Manager(ApplicationManager):
         self.peak_application_instance.peak_classification_run()
 
         self.phase_application_instance = PhaseApplication(self.phase_data_directory, self.phase_kernel)
+        self.phase_application_instance.phase_classification_run()
+
+class FileManager(ApplicationManager):
+    def __init__(self,
+                 peak_data_path='test_processing_data/',
+                 phase_data_path=None,
+                 peak_kernel: AbstractPeakKernel = None,
+                 phase_kernel: AbstractPhaseKernel = None,
+                 current_session=None) -> None:
+        super().__init__(current_session=current_session,
+                         peak_kernel=peak_kernel,
+                         phase_kernel=phase_kernel)
+
+        self.peak_data_path = os.path.join(self.executing_path, peak_data_path)
+        self.phase_data_path = self._default_peak_data_path if phase_data_path is None else phase_data_path
+
+    def __call__(self):
+        self.peak_application_instance = PeakApplication(self.peak_data_path, self.peak_kernel)
+        self.peak_application_instance.peak_classification_run()
+
+        self.phase_application_instance = PhaseApplication(self.phase_data_path, self.phase_kernel)
         self.phase_application_instance.phase_classification_run()

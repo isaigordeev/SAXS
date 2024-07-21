@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from saxs.gaussian_processing.manager import Manager
+from saxs.gaussian_processing.manager import DirectoryManager
 from saxs.gaussian_processing.peak.default_kernel import DefaultPeakKernel
 from saxs.gaussian_processing.peak.peak_application import PeakApplication
 from saxs.gaussian_processing.phase.default_kernel import DefaultPhaseKernel
@@ -20,7 +20,7 @@ from saxs.gaussian_processing.phase.phase_classificator import AbstractPhaseKern
 # b.phase_classification()
 
 # a = Manager(peak_kernel=ParabolePeakKernel, phase_kernel=DefaultPhaseKernel)
-a = Manager(peak_kernel=RobustParabolePeakKernel, phase_kernel=DefaultPhaseKernel)
+a = DirectoryManager(peak_kernel=RobustParabolePeakKernel, phase_kernel=DefaultPhaseKernel)
 # a = Manager(peak_data_directory='res/', peak_kernel=RobustParabolePeakKernel, phase_kernel=DefaultPhaseKernel)
 
 # a = Manager(peak_kernel=ProminencePeakKernel, phase_kernel=DefaultPhaseKernel)
