@@ -1,7 +1,7 @@
 import json
 import time
 
-from saxs.gaussian_processing.manager import DirectoryManager
+from saxs.gaussian_processing.manager import Manager
 from saxs.gaussian_processing.phase.custom_phase_classification import *
 from saxs.saxs_model.phase_prediction import prediction_from_csv, prediction_from_npy
 import torch
@@ -42,7 +42,7 @@ class Pipeline(PipelineAbstract):
         if self.is_model_prediction:
             self.load_model()
         if self.is_processing_prediction:
-            self.processing_manager = DirectoryManager(self.data_path, self.peak_kernel, self.phase_kernel)
+            self.processing_manager = Manager(self.data_path, self.peak_kernel, self.phase_kernel)
 
     def load_model(self):
         self.model = torch.load(self.model_path)

@@ -14,8 +14,8 @@ from saxs.gaussian_processing.settings_processing import INFINITY, PROMINENCE, B
 
 
 class DefaultPeakApplication(PeakApplication):
-    def __init__(self, current_session, data_directory, filename):
-        super().__init__(current_session, data_directory, filename)
+    def __init__(self, current_session, data_path, filename):
+        super().__init__(current_session, data_path, filename)
 
         # self.peaks_plots = {}
         self.cut_point = None

@@ -9,9 +9,9 @@ from saxs.gaussian_processing.settings_processing import INFINITY, PROMINENCE, B
 
 
 class PDefaultPeakClassificator(DefaultPeakApplication):
-    def __init__(self, current_session, data_directory, filename):
+    def __init__(self, current_session, data_path, filename):
 
-        super().__init__(current_session, data_directory, filename)
+        super().__init__(current_session, data_path, filename)
 
         self.ppeak_number = 0
         self.sigmas = np.array([])

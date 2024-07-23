@@ -13,25 +13,37 @@ from saxs.gaussian_processing.settings_processing import EXTENSION, ANALYSE_DIR_
 
 class PeakApplication(ApplicationClassificator):
 
-    def __init__(self, data_directory,
+    def __init__(self, data_path,
                  kernel: AbstractPeakKernel = None,
                  is_preprocessing=True,
                  is_background_reduction=True,
                  is_filtering=True,
+                 write_data=True,
                  is_peak_processing=True,
                  ):
-        super().__init__(data_directory)
+        super().__init__(data_path)
 
+        self.write_data = write_data
         self.peak_classificator = None
         self.kernel = kernel
         self.file_analysis_dir_peaks = None
         self.file_analysis_dir = None
-        self.samples = get_filenames_without_ext(self.data_directory)
 
         self.is_preprocessing = is_preprocessing
         self.is_background_reduction = is_background_reduction
         self.is_filtering = is_filtering
         self.is_peak_processing = is_peak_processing
+        self.samples = None
+
+        if os.path.isdir(self.data_directory):
+            self.find_files_in_directory()
+        elif os.path.isfile(self.data_directory):
+            filename = os.path.basename(self.data_directory)
+            name, extension = os.path.splitext(filename)
+            self.samples = [(name, extension)]
+
+    def find_files_in_directory(self):
+        self.samples = get_filenames_without_ext(self.data_directory)
 
     def set_output_peak_directories(self, filename):  # TODO MAKE STATIC
         self.file_analysis_dir = os.path.join(self._result_plots_dir, filename)
@@ -52,7 +64,8 @@ class PeakApplication(ApplicationClassificator):
 
     def peak_classification_run(self):
         for sample_name, sample_ext in self.samples:
-            sample = '{}{}'.format(sample_name, sample_ext)
+            sample = '{}{}'.format(sample_name, sample_ext)  # TODO what is it?
+            print(sample)
             self.set_output_peak_directories(sample)
 
             try:
@@ -69,4 +82,5 @@ class PeakApplication(ApplicationClassificator):
             except:
                 self.data[sample] = {'error': None}
 
-        self.write_peaks_data()
+        if self.write_data:
+            self.write_peaks_data()

@@ -10,12 +10,11 @@ from saxs.gaussian_processing.phase.phase_application import PhaseApplication
 class ApplicationManager(Application):
     def __init__(self,
                  peak_kernel: PeakApplication = None,
-                 phase_kernel: PhaseApplication= None,
+                 phase_kernel: PhaseApplication = None,
                  current_session=None,
                  custom_output_directory=None
                  ) -> None:
         super().__init__(current_session, custom_output_directory)
-
 
         self.data = {}
         self.files_number = 0
