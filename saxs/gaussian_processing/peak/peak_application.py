@@ -79,7 +79,8 @@ class PeakApplication(ApplicationClassificator):
 
                 print(sample)
                 self.data[sample] = self.peak_classificator()
-            except:
+            except Exception as e:
+                print(f"Error processing sample {sample}: {e}")
                 self.data[sample] = {'error': None}
 
         if self.write_data:

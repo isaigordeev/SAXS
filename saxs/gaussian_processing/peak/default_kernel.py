@@ -45,7 +45,7 @@ class DefaultPeakKernel(AbstractPeakKernel):
         popt, pcov = curve_fit(
             f=background_function,
             xdata=self.current_q_state,
-            ydata=self.current_I_state,  # TODO after of before preprocesss?
+            ydata=self.current_I_state,  # TODO after of before preprocess?
             p0=(3, 2),
             sigma=self.dI
         )
