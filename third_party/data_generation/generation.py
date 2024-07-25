@@ -4,15 +4,12 @@ import numpy as np
 # Instantiate the synthetic saxs_model: 'P', 'G', or 'D'
 import argparse
 
-
-from .generation_settings import bijection_name, core_path
-from .saxspy import CubicModel
-
+from generation_settings import bijection_name, core_path
+from saxspy import CubicModel
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import matplotlib.pyplot as plt
-
 
 
 class Generator:
@@ -42,7 +39,6 @@ class Generator:
             if not os.path.exists(self.save_path):
                 os.mkdir(self.save_path)
 
-
     def generation(self):
         if self.phase == 'cubic':
             if self.cubic_mesophase is not None:
@@ -55,7 +51,7 @@ class Generator:
                 print(f"running cubic {self.cubic_mesophase} model...")
                 cm = CubicModel(self.cubic_mesophase)
 
-                #----------------------- generate synthetic test_processing_data -----------------------#
+                # ----------------------- generate synthetic test_processing_data -----------------------#
                 # ranges of: lattice parameter, length of lipid, lipid head sigma
 
                 # params = np.array([[28, 40], [0.2, 0.5], [0.5, 1]])  #good but lattice parameter
@@ -64,13 +60,10 @@ class Generator:
                 # params = np.array([[10, 40], [0.15, 0.20], [0.01, 0.1]]) # good for 10 0.15 0.01 P
                 # params = np.array([[10, 40], [0.15, 0.17], [0.04, 0.06]]) # good for 10 0.15 0.04 P
 
-
                 # params10 = np.array([[10, 10], [0.13, 0.17], [0.02, 0.06]])
 
                 # params40 = [[value * 4 for value in sublist] for sublist in params10]
                 # print(params40)
-
-
 
                 store_it = cm.generateSynthCubic(self.params, self.lat_num, self.length_num, self.sigma_num)
 
@@ -88,7 +81,8 @@ class Generator:
                 print(self.save_path)
                 np.save(self.save_path, store_it)
 
-            else: raise AttributeError('Enter cubic mesophase:  -phase \'cubic\' --mph \'Im3m\'')
+            else:
+                raise AttributeError('Enter cubic mesophase:  -phase \'cubic\' --mph \'Im3m\'')
         elif self.phase == 'lamellar':
             pass
         elif self.phase == 'hexagonal':

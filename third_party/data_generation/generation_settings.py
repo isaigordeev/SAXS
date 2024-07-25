@@ -3,3 +3,5 @@ bijection_name = {'P': 'Im3m',
                   'D': 'Pn3m'}
 
 core_path = 'data_generation/'
+
+

@@ -9,9 +9,20 @@ from tqdm import tqdm
 from scipy.special import wofz
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
-from saxs.saxs_model.tools import standartization
-from saxs.saxs_model.model_settings import IMAGE_DIM
+# from saxs.saxs_model.tools import standartization
+# from saxs.saxs_model.model_settings import IMAGE_DIM
 
+IMAGE_DIM = 256
+
+
+def standartization(sample):
+    mean = np.mean(sample)
+    var = np.std(sample)
+    sample -= mean
+    sample /= (var ** 0.5)
+    sample /= np.max(sample)
+
+    return sample
 
 
 
@@ -152,7 +163,8 @@ def Process_cubic(data):
     # I = minmax(zero_array + np.exp(-blanky))
     # I = minmax(zero_array + log(blanky))
     # I = minmax(zero_array + 1/blanky)
-    I = minmax(zero_array + blanky)
+    I = minmax(zero_array + (blanky))
+    print(max(I))
     # plt.plot(I)
     # plt.plot(zero_array)
     #
@@ -160,6 +172,8 @@ def Process_cubic(data):
 
 
     cubics = CubicSpline(q, I, bc_type='natural')
+    # cubics = CubicSpline(q, zero_array, bc_type='natural')
+
     I = cubics(q2)
     # plt.plot(np.exp(I))
     # plt.show()
@@ -170,9 +184,9 @@ def Process_cubic(data):
 
     I = I[:IMAGE_DIM] #for embeddings
 
-    I = standartization(I)
+    # I = standartization(I)
     # I /= np.max(I)
-    return I
+    return 4*I
 
 class Processing:
     def __init__(self, custom_dataraw_folder=None, number_to_process=None, start_to_process=None):

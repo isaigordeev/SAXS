@@ -269,7 +269,7 @@ class CubicModel():
             x, y, z = np.pi*np.mgrid[-1:1:steps*1j, -1:1:steps*1j, -1:1:steps*1j] * 1
             vol = gyroid(x,y,z)
         # convert 3D volume to triangulated surface
-        verts, faces, normals, values = measure.marching_cubes_lewiner(vol, 0, spacing=(0.1, 0.1, 0.1))
+        verts, faces, normals, values = measure.marching_cubes(vol, 0, spacing=(0.1, 0.1, 0.1))
         # scale vertices by lattice parameter
         verts = verts/np.max(verts)*lat_param
 
