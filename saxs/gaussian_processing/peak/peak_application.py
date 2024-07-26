@@ -69,19 +69,27 @@ class PeakApplication(ApplicationClassificator):
             self.set_output_peak_directories(sample)
 
             try:
-                self.peak_classificator = self.kernel(
-                    os.path.join(self.data_directory, sample),
-                    self.file_analysis_dir,
-                    self.is_peak_processing,
-                    self.is_background_reduction,
-                    self.is_filtering,
-                    self.is_peak_processing)
+                if os.path.isdir(self.data_directory):
+                    self.peak_classificator = self.kernel(
+                        os.path.join(self.data_directory, sample),
+                        self.file_analysis_dir,
+                        self.is_peak_processing,
+                        self.is_background_reduction,
+                        self.is_filtering,
+                        self.is_peak_processing)
+                else:
+                    self.peak_classificator = self.kernel(
+                        os.path.join(self.data_directory),
+                        self.file_analysis_dir,
+                        self.is_peak_processing,
+                        self.is_background_reduction,
+                        self.is_filtering,
+                        self.is_peak_processing)
 
-                print(sample)
                 self.data[sample] = self.peak_classificator()
             except Exception as e:
                 print(f"Error processing sample {sample}: {e}")
-                self.data[sample] = {'error': None}
+                self.data[sample] = {'error': e}
 
         if self.write_data:
             self.write_peaks_data()
