@@ -75,12 +75,57 @@ class ParabolePeakKernel(ProminencePeakKernel):
                 self.parabole_number += 1
                 self.parabole_popt_for_gauss[self.peaks[i]] = popt
 
-    def gauss_peak_fitting(self, i):
+
+    def gauss_peak_fitting_minimize(self, i):
         if len(self.peaks) > i:
             if np.size(self.peaks) != 0:
+
                 delta = self.parabole_popt_for_gauss[self.peaks[i]][0] / self.delta_q
 
                 delta /= 2
+
+                period1 = int(self.peaks[i] - delta)
+                period2 = int(self.peaks[i] + delta)
+
+                def loss_function(params):
+                    sigma = params[0]
+                    ampl = params[1]
+                    y_pred = gauss(self.current_q_state, self.current_q_state[self.peaks[i]], sigma, ampl)
+
+                    # return np.sum((y_pred - self.I_background_filtered) ** 2)
+                    return np.sum((y_pred[period1:period2] - self.I_background_filtered[period1:period2]) ** 2)
+
+                result = minimize(loss_function, self.parabole_popt_for_gauss[self.peaks[i]], method='BFGS')
+                fitted_params = result.x
+
+                self.peak_params = np.append(self.peak_params, self.current_q_state[self.peaks[i]])
+                self.peak_params = np.append(self.peak_params, fitted_params[1])
+                self.peak_params = np.append(self.peak_params, fitted_params[0])
+
+                self.current_gauss = gauss(self.current_q_state, self.current_q_state[self.peaks[i]], fitted_params[0], fitted_params[1])
+
+                plt.clf()
+                plt.plot(self.current_q_state, self.current_I_state)
+                plt.plot(self.current_q_state, self.current_gauss)
+                # plt.plot(self.current_q_state[period1//2:period2*2], current_parabole[period1//2:period2*2])
+                plt.plot(self.current_q_state[period1:period2], self.current_I_state[period1:period2])
+                plt.plot(self.current_q_state[period1:period2], self.current_gauss[period1:period2], 'red')
+
+                plt.title(f'{fitted_params}')
+                plt.savefig('{}minimize_gauss_peak_{}.png'.format(self.file_analysis_dir_peaks, self.gaussian_peak_number))
+
+                self.gaussian_peak_number += 1
+
+
+    def gauss_peak_fitting_curve_fit(self, i):
+        if len(self.peaks) > i:
+            if np.size(self.peaks) != 0:
+
+
+                delta = self.parabole_popt_for_gauss[self.peaks[i]][0] / self.delta_q
+
+
+                # delta /= 2
 
                 period1 = int(self.peaks[i] - delta)
                 period2 = int(self.peaks[i] + delta)
@@ -139,7 +184,8 @@ class ParabolePeakKernel(ProminencePeakKernel):
                 break
 
             self.parabole_peak_fitting(peak_counter)
-            self.gauss_peak_fitting(peak_counter)
+            self.gauss_peak_fitting_minimize(peak_counter)
+            # self.gauss_peak_fitting_curve_fit(peak_counter)
             self.gaussian_peak_reduction(peak_counter)
 
         self.peaks = self.peaks_processed.astype(int)

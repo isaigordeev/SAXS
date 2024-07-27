@@ -10,16 +10,17 @@ from saxs.gaussian_processing.peak.prominence_kernel import ProminencePeakKernel
 from saxs.gaussian_processing.peak.parabole_kernel import ParabolePeakKernel, RobustParabolePeakKernel
 
 
-class AttentionGateTest(unittest.TestCase):
+class DataLabTest(unittest.TestCase):
 
     def setUp(self):
         self.application = Manager(peak_data_path="test_processing_data/075773_treated_xye.csv" , peak_kernel=RobustParabolePeakKernel, phase_kernel=DefaultPhaseKernel)
         self.application()
+        self.expected_peaks = 6
 
     def test_parabole_peak_kernel(self):
         peak_classificator = self.application.peak_application_instance.peak_classificator
         if isinstance(peak_classificator, RobustParabolePeakKernel):
-            self.assertEqual(len(peak_classificator.peaks), 8)
+            self.assertEqual(len(peak_classificator.peaks), self.expected_peaks)
 
 
 

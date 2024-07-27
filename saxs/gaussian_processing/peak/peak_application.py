@@ -66,9 +66,11 @@ class PeakApplication(ApplicationClassificator):
         for sample_name, sample_ext in self.samples:
             sample = '{}{}'.format(sample_name, sample_ext)  # TODO what is it?
             print(sample)
-            self.set_output_peak_directories(sample)
 
-            try:
+            if self.write_data:
+                self.set_output_peak_directories(sample)
+
+            try: # TODO optimise replace try and statement
                 if os.path.isdir(self.data_directory):
                     self.peak_classificator = self.kernel(
                         os.path.join(self.data_directory, sample),
@@ -91,5 +93,5 @@ class PeakApplication(ApplicationClassificator):
                 print(f"Error processing sample {sample}: {e}")
                 self.data[sample] = {'error': e}
 
-        if self.write_data:
+        if self.write_data: # TODO per file design arch?
             self.write_peaks_data()
