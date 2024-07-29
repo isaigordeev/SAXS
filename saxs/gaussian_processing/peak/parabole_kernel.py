@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit, minimize
 
 from .prominence_kernel import ProminencePeakKernel
-from saxs.gaussian_processing.functions import parabole, gauss
+from saxs.gaussian_processing.functions import parabole, gauss, background_hyberbole
 
 
 class ParabolePeakKernel(ProminencePeakKernel):
@@ -29,7 +29,6 @@ class ParabolePeakKernel(ProminencePeakKernel):
         self.current_gauss = np.array([])
         self.peaks_processed = np.array([])
         self.peak_params = np.array([])  # mean, amlitude, std
-
 
     def negative_reduction(self):
         self.current_I_state = np.maximum(self.current_I_state, 0)
@@ -58,11 +57,11 @@ class ParabolePeakKernel(ProminencePeakKernel):
                 result = minimize(loss_function, np.array([0.5, 2]))
                 fitted_params = result.x
 
-
                 period2 = int(self.peaks[i] + start_delta)
                 period1 = int(self.peaks[i] - start_delta)
 
-                current_parabole = parabole(self.current_q_state, self.current_q_state[self.peaks[i]], fitted_params[0], fitted_params[1])
+                current_parabole = parabole(self.current_q_state, self.current_q_state[self.peaks[i]], fitted_params[0],
+                                            fitted_params[1])
 
                 plt.clf()
                 plt.plot(self.current_q_state, self.current_I_state)
@@ -75,7 +74,6 @@ class ParabolePeakKernel(ProminencePeakKernel):
 
                 self.parabole_number += 1
                 self.parabole_popt_for_gauss[self.peaks[i]] = fitted_params
-
 
     def parabole_peak_curve_fit(self, i):
         if len(self.peaks) > i:
@@ -118,34 +116,42 @@ class ParabolePeakKernel(ProminencePeakKernel):
                 self.parabole_number += 1
                 self.parabole_popt_for_gauss[self.peaks[i]] = popt
 
-
     def gauss_peak_fitting_minimize(self, i):
         if len(self.peaks) > i:
             if np.size(self.peaks) != 0:
-
                 delta = self.parabole_popt_for_gauss[self.peaks[i]][0] / self.delta_q
 
-                delta /= 2
+                # delta /= 1.5
 
                 period1 = int(self.peaks[i] - delta)
                 period2 = int(self.peaks[i] + delta)
+                padding = 0
+                zeros_padding = np.zeros(padding)
 
                 def loss_function(params):
+                    background = np.array([])
+
                     sigma = params[0]
                     ampl = params[1]
+
                     y_pred = gauss(self.current_q_state, self.current_q_state[self.peaks[i]], sigma, ampl)
+                    background = np.append(background, zeros_padding)
+                    background = np.append(background, self.I_background_filtered[period1:period2])
+                    background = np.append(background, zeros_padding)
 
                     # return np.sum((y_pred - self.I_background_filtered) ** 2)
-                    return np.sum((y_pred[period1:period2] - self.I_background_filtered[period1:period2]) ** 2)
+                    return np.sum((y_pred[period1 - padding:period2 + padding] - background) ** 2)
 
-                result = minimize(loss_function, self.parabole_popt_for_gauss[self.peaks[i]], method='BFGS')
+                # result = minimize(loss_function, self.parabole_popt_for_gauss[self.peaks[i]], method='BFGS')
+                result = minimize(loss_function, self.parabole_popt_for_gauss[self.peaks[i]])
                 fitted_params = result.x
 
                 self.peak_params = np.append(self.peak_params, self.current_q_state[self.peaks[i]])
                 self.peak_params = np.append(self.peak_params, fitted_params[1])
                 self.peak_params = np.append(self.peak_params, fitted_params[0])
 
-                self.current_gauss = gauss(self.current_q_state, self.current_q_state[self.peaks[i]], fitted_params[0], fitted_params[1])
+                self.current_gauss = gauss(self.current_q_state, self.current_q_state[self.peaks[i]], fitted_params[0],
+                                           fitted_params[1])
 
                 plt.clf()
                 plt.plot(self.current_q_state, self.current_I_state)
@@ -155,18 +161,16 @@ class ParabolePeakKernel(ProminencePeakKernel):
                 plt.plot(self.current_q_state[period1:period2], self.current_gauss[period1:period2], 'red')
 
                 plt.title(f'{fitted_params}')
-                plt.savefig('{}minimize_gauss_peak_{}.png'.format(self.file_analysis_dir_peaks, self.gaussian_peak_number))
+                plt.savefig(
+                    '{}minimize_gauss_peak_{}.png'.format(self.file_analysis_dir_peaks, self.gaussian_peak_number))
 
                 self.gaussian_peak_number += 1
-
 
     def gauss_peak_fitting_curve_fit(self, i):
         if len(self.peaks) > i:
             if np.size(self.peaks) != 0:
 
-
                 delta = self.parabole_popt_for_gauss[self.peaks[i]][0] / self.delta_q
-
 
                 # delta /= 2
 
@@ -240,6 +244,7 @@ class ParabolePeakKernel(ProminencePeakKernel):
 
 class RobustParabolePeakKernel(ParabolePeakKernel):
     str_type = "RobustParabolePeakKernel"
+
     def __init__(self, data_dir, file_analysis_dir,
                  is_preprocessing=True,
                  is_postprocessing=True,
@@ -255,8 +260,8 @@ class RobustParabolePeakKernel(ParabolePeakKernel):
                          is_filtering,
                          is_peak_processing
                          )
-        self.final_peaks = None
         self.fitted_peak_params = None
+        self.final_peaks = None
         self.y_final_fit = None
 
     @classmethod
@@ -274,11 +279,8 @@ class RobustParabolePeakKernel(ParabolePeakKernel):
             number += 1
         return y
 
-    # def gaussian_sum_and_background(self, x, *params):
-
     def sum_gaussian_total_fit(self):
         if len(self.peaks) != 0 and len(self.peak_params) != 0:
-
             def loss_function(params):
                 # y_pred = gaussian_sum(self.q, *params)
                 y_pred = self.gaussian_sum(self.current_q_state, *params)
@@ -295,7 +297,6 @@ class RobustParabolePeakKernel(ParabolePeakKernel):
             self.robust_parabole_peak_kernel_plot()
             self.final_peaks = sorted(self.fitted_peak_params[::3])
 
-
     def postprocessing(self):
         # print(self.peak_params)
         self.sum_gaussian_total_fit()
@@ -303,7 +304,6 @@ class RobustParabolePeakKernel(ParabolePeakKernel):
     def gathering(self) -> dict:
         peak_number = len(self.peaks) if self.peaks is not None else -1
         print("peak found: ", peak_number)
-        
 
         return {
             'peak kernel method': self.class_info(),
@@ -324,13 +324,100 @@ class RobustParabolePeakKernel(ParabolePeakKernel):
             # 'loss_ratio': self.final_loss / self.start_loss
         }
 
-
     def robust_parabole_peak_kernel_plot(self):
         plt.clf()
-        plt.plot(self.current_q_state, self.total_fit, color='b',label="preliminary fit")
+        plt.plot(self.current_q_state, self.total_fit, color='b', label="preliminary fit")
         plt.plot(self.current_q_state, self.I_background_filtered, color='g', label="unfiltered cut background")
         plt.plot(self.current_q_state, self.y_final_fit, color='r', label="final fit")
 
         plt.legend()
 
         plt.savefig("{}/robust_parabole_peak_kernel_plot.pdf".format(self.file_analysis_dir))
+
+
+class RobustParabolePeakKernelWithBackground(RobustParabolePeakKernel):
+    str_type = "RobustParabolePeakKernelWithBackground"
+    def __init__(self, data_dir, file_analysis_dir,
+                 is_preprocessing=True,
+                 is_postprocessing=True,
+                 is_background_reduction=True,
+                 is_filtering=True,
+                 is_peak_processing=True
+                 ):
+        super().__init__(data_dir, file_analysis_dir,
+                         is_preprocessing,
+                         is_postprocessing,
+                         is_background_reduction,
+                         is_filtering,
+                         is_peak_processing
+                         )
+        self.final_background = None
+
+    def default_background_reduction(self, background_function=background_hyberbole):
+        super().default_background_reduction(background_function)
+        self.peak_params = np.append(self.peak_params, self.popt_background[0])
+        self.peak_params = np.append(self.peak_params, self.popt_background[1])
+
+    def gaussian_sum_and_background(self, x, *params):
+        return background_hyberbole(x, params[0], params[1]) + self.gaussian_sum(x, *(params[2:]))
+
+    def sum_gaussian_and_background_total_fit(self):
+        if len(self.peaks) != 0 and len(self.peak_params) != 0:
+            def loss_function(params):
+                y_pred = self.gaussian_sum_and_background(self.current_q_state, *params)
+
+                return np.sum((y_pred - self.I_cut) ** 2)
+
+
+            result = minimize(loss_function, self.peak_params, method='BFGS')
+            fitted_params = result.x
+            self.fitted_peak_params = fitted_params
+            self.y_final_fit = background_hyberbole(self.current_q_state, self.fitted_peak_params[0], self.fitted_peak_params[1]) + self.gaussian_sum(self.current_q_state, *(fitted_params[2:]))
+            # print("fit", self.fitted_peak_params)
+
+            self.robust_parabole_peak_kernel_plot()
+            self.robust_parabole_peak_kernel_plot_detailed()
+            self.final_peaks = sorted(self.fitted_peak_params[2:][::3])
+
+    def robust_parabole_peak_kernel_plot_detailed(self):
+        plt.clf()
+        print(self.popt_background)
+        print(self.fitted_peak_params[:2])
+
+        colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+        background = background_hyberbole(self.current_q_state, self.popt_background[0], self.popt_background[1])
+        final_background = background_hyberbole(self.current_q_state, self.fitted_peak_params[0],
+                                                self.fitted_peak_params[1])
+
+        plt.plot(self.current_q_state, self.total_fit + background, color=colors[0], label="preliminary fit")
+        plt.plot(self.current_q_state, self.I_cut, color=colors[1], label="unfiltered cut")
+        plt.plot(self.current_q_state, background, color=colors[2], label="initial background")
+        plt.plot(self.current_q_state, self.I_background_filtered, color=colors[3], label="background filtered")
+        plt.plot(self.current_q_state, final_background, color=colors[4], label="final background")
+        plt.plot(self.current_q_state, self.y_final_fit, color=colors[5], label="final fit")
+
+        plt.legend()
+
+        plt.savefig(f"{self.file_analysis_dir}/robust_parabole_peak_kernel_plot_with_background_detailed.pdf")
+
+    def robust_parabole_peak_kernel_plot(self):
+        plt.clf()
+        print(self.popt_background)
+        print(self.fitted_peak_params[:2])
+
+        colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+        final_background = background_hyberbole(self.current_q_state, self.fitted_peak_params[0],
+                                                self.fitted_peak_params[1])
+
+        plt.plot(self.current_q_state, self.I_cut, color=colors[1], label="unfiltered cut")
+        plt.plot(self.current_q_state, final_background, color=colors[4], label="final background")
+        plt.plot(self.current_q_state, self.y_final_fit, color=colors[5], label="final fit")
+
+        plt.legend()
+
+        plt.savefig(f"{self.file_analysis_dir}/robust_parabole_peak_kernel_plot_with_background.pdf")
+
+    def postprocessing(self):
+        self.sum_gaussian_and_background_total_fit()

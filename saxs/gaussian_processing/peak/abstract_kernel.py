@@ -41,7 +41,8 @@ class AbstractPeakKernel:
                  'data_dir',
                  'data_path',
                  'filename',
-                 'props'
+                 'props',
+                 'fitted_peak_params'
                  )
 
     @classmethod

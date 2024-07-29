@@ -10,7 +10,7 @@ from saxs.gaussian_processing.peak.prominence_kernel import ProminencePeakKernel
 from saxs.gaussian_processing.peak.parabole_kernel import ParabolePeakKernel, RobustParabolePeakKernel
 
 
-class DataLabTest(unittest.TestCase):
+class SingleDatafileLabTest(unittest.TestCase):
 
     def setUp(self):
         self.application = Manager(peak_data_path="test_processing_data/075773_treated_xye.csv" , peak_kernel=RobustParabolePeakKernel, phase_kernel=DefaultPhaseKernel)

@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from saxs.gaussian_processing.peak.abstract_kernel import AbstractPeakKernel
+from saxs.gaussian_processing.peak.parabole_kernel import RobustParabolePeakKernel
 from saxs.gaussian_processing.processing_classificator import ApplicationClassificator
 from saxs.gaussian_processing.processing_outils import get_filenames, get_filenames_without_ext
 from saxs.gaussian_processing.settings_processing import EXTENSION, ANALYSE_DIR_SESSIONS, ANALYSE_DIR_SESSIONS_RESULTS
@@ -34,6 +35,7 @@ class PeakApplication(ApplicationClassificator):
         self.is_filtering = is_filtering
         self.is_peak_processing = is_peak_processing
         self.samples = None
+        self.peak_numbers_by_sample = []
 
         if os.path.isdir(self.data_directory):
             self.find_files_in_directory()
@@ -89,9 +91,13 @@ class PeakApplication(ApplicationClassificator):
                         self.is_peak_processing)
 
                 self.data[sample] = self.peak_classificator()
+                if isinstance(self.peak_classificator, RobustParabolePeakKernel):
+                    self.peak_numbers_by_sample.append(len(self.peak_classificator.peaks))
             except Exception as e:
                 print(f"Error processing sample {sample}: {e}")
-                self.data[sample] = {'error': e}
+                # self.data[sample] = {'error': str(e)}
+                self.data[sample] = {'error': (e)}
+                self.peak_numbers_by_sample.append(None)
 
         if self.write_data: # TODO per file design arch?
             self.write_peaks_data()
