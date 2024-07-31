@@ -30,6 +30,7 @@ jupyter = "^1.0.0"
 scikit-image = "^0.24.0"
 ipyvuetify = "^1.10.0"
 torch = "2.2.2"
+plotly = "^5.23.0"
 
 [build-system]
 requires = ["poetry-core"]
