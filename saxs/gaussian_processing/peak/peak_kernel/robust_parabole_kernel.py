@@ -186,11 +186,27 @@ class RobustParabolePeakKernelWithBackground(RobustParabolePeakKernel):
     def gaussian_fit_troubleshoot(self, accuracy=4):
         if len(self.peaks) != 0 and len(self.peak_params) != 0:
             grad = np.diff(self.peaks)
+            peaks_to_delete = []
+            peak_params_to_delete = []
+
             for i, x in enumerate(grad):
                 if x < accuracy:
-                    self.peaks[i] = int(np.mean((self.peaks[i], self.peaks[i + 1])))
-                    self.peaks = np.delete(self.peaks, i + 1)
-                    self.peak_params = np.delete(self.peak_params, range(2+3*(i+1), 2+3*(i+1) + 3))
+                    middle_i = self.peak_params[2 + 3 * i + 2]
+                    middle_i_plus_1 = self.peak_params[
+                        2 + 3 * (i + 1) + 2]
+
+                    if middle_i > middle_i_plus_1:
+                        self.peaks[i] = int(np.mean([self.peaks[i], self.peaks[i + 1]]))
+                        peaks_to_delete.append(i)  # Delete peak[i]
+                        peak_params_to_delete.extend(range(2 + 3 * i, 2 + 3 * i + 3))
+                    else:
+                        self.peaks[i] = int(np.mean([self.peaks[i], self.peaks[i + 1]]))
+                        peaks_to_delete.append(i + 1)
+                        peak_params_to_delete.extend(
+                            range(2 + 3 * (i + 1), 2 + 3 * (i + 1) + 3))
+
+            self.peaks = np.delete(self.peaks, peaks_to_delete)
+            self.peak_params = np.delete(self.peak_params, peak_params_to_delete)
 
     def postprocessing(self):
         self.gaussian_fit_troubleshoot()

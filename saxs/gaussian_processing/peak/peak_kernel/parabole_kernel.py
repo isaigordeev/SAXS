@@ -216,7 +216,7 @@ class ParabolePeakKernel(ProminencePeakKernel):
         self.total_fit += self.current_gauss
         self.peaks_processed = np.append(self.peaks_processed, self.peaks[i])
 
-    def search_peaks(self, height=1.5, prominence=0.3):  # TODO Optimal parameteres?
+    def search_peaks(self, height=1, prominence=0.3):  # TODO Optimal parameteres?
         self.sequential_search_peaks(height, prominence)
 
     def sequential_search_peaks(self, height, prominence):
