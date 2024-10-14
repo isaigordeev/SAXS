@@ -1,15 +1,10 @@
 import json
 import os
-from abc import ABC
 
-import numpy as np
-import pandas as pd
-
-from saxs.gaussian_processing.peak.abstract_kernel import AbstractPeakKernel
-from saxs.gaussian_processing.peak.parabole_kernel import RobustParabolePeakKernel
+from saxs.gaussian_processing.peak.peak_kernel.abstract_kernel import AbstractPeakKernel
+from saxs.gaussian_processing.peak.peak_kernel.robust_parabole_kernel import RobustParabolePeakKernel
 from saxs.gaussian_processing.processing_classificator import ApplicationClassificator
-from saxs.gaussian_processing.processing_outils import get_filenames, get_filenames_without_ext
-from saxs.gaussian_processing.settings_processing import EXTENSION, ANALYSE_DIR_SESSIONS, ANALYSE_DIR_SESSIONS_RESULTS
+from saxs.gaussian_processing.processing_outils import get_filenames_without_ext
 
 
 class PeakApplication(ApplicationClassificator):
@@ -72,7 +67,7 @@ class PeakApplication(ApplicationClassificator):
             if self.write_data:
                 self.set_output_peak_directories(sample)
 
-            try: # TODO optimise replace try and statement
+            try:  # TODO optimise replace try and statement
                 if os.path.isdir(self.data_directory):
                     self.peak_classificator = self.kernel(
                         os.path.join(self.data_directory, sample),
@@ -99,5 +94,5 @@ class PeakApplication(ApplicationClassificator):
                 self.data[sample] = {'error': (e)}
                 self.peak_numbers_by_sample.append(None)
 
-        if self.write_data: # TODO per file design arch?
+        if self.write_data:  # TODO per file design arch?
             self.write_peaks_data()

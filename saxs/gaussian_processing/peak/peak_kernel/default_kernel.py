@@ -1,9 +1,8 @@
 import numpy as np
 from scipy.optimize import curve_fit
-from scipy.signal import find_peaks
 
 from saxs.gaussian_processing.functions import background_hyberbole
-from saxs.gaussian_processing.peak.abstract_kernel import AbstractPeakKernel
+from saxs.gaussian_processing.peak.peak_kernel.abstract_kernel import AbstractPeakKernel
 from saxs.gaussian_processing.settings_processing import BACKGROUND_COEF, START
 
 

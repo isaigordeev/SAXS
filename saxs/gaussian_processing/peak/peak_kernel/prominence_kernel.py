@@ -1,13 +1,8 @@
-import csv
-
 import numpy as np
-from matplotlib import pyplot as plt
 from scipy.signal import find_peaks, medfilt
 
 from saxs.gaussian_processing.functions import moving_average
-from saxs.gaussian_processing.peak.abstract_kernel import AbstractPeakKernel
-from saxs.gaussian_processing.peak.default_kernel import DefaultPeakKernel
-from saxs.gaussian_processing.settings_processing import START
+from saxs.gaussian_processing.peak.peak_kernel.default_kernel import DefaultPeakKernel
 
 
 class ProminencePeakKernel(DefaultPeakKernel):

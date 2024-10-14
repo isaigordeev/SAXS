@@ -2,7 +2,6 @@ import json
 import time
 
 from saxs.gaussian_processing.manager import Manager
-from saxs.gaussian_processing.phase.custom_phase_classification import *
 import torch
 
 

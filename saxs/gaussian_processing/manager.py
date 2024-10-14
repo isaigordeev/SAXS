@@ -1,11 +1,10 @@
 import time
-from typing import Any
 
 from .application import ApplicationManager
-from .peak.abstract_kernel import AbstractPeakKernel
+from saxs.gaussian_processing.peak.peak_kernel.abstract_kernel import AbstractPeakKernel
 from .peak.peak_application import PeakApplication
 from .phase.phase_application import PhaseApplication
-from .phase.phase_classificator import AbstractPhaseKernel
+from .phase.phase_kernel.abstract_kernel import AbstractPhaseKernel
 
 time_start1 = time.time()
 

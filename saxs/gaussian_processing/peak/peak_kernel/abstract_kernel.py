@@ -141,14 +141,14 @@ class AbstractPeakKernel:
         plt.legend()
         plt.savefig("{}/peaks_plot.pdf".format(self.file_analysis_dir))
 
-    def final_plot(self):
+    def final_plot(self, number=0):
         plt.clf()
         plt.plot(self.q_raw, self.I_raw, label='raw_plot')
         plt.plot(self.q_raw[self.noisy_irrelevant_cut_point + self.peaks],
                  self.I_raw[self.noisy_irrelevant_cut_point + self.peaks], 'rx', label='peaks_on_raw')
         plt.plot(self.q_raw, self.zero_level, label='zero_level')
         plt.legend()
-        plt.savefig("{}/final_plot.pdf".format(self.file_analysis_dir))
+        plt.savefig("{}/final_plot_{}.pdf".format(self.file_analysis_dir, number))
 
     def extended_peaks_plots(self):
         plt.clf()
