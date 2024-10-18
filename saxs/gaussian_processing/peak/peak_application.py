@@ -2,7 +2,7 @@ import json
 import os
 
 from saxs.gaussian_processing.peak.peak_kernel.abstract_kernel import AbstractPeakKernel
-from saxs.gaussian_processing.peak.peak_kernel.robust_parabole_kernel import RobustParabolePeakKernel
+from saxs.gaussian_processing.peak.peak_kernel.robust_parabole_kernel import RobustParabolePeakKernel, RobustParabolePeakKernelWithBackground
 from saxs.gaussian_processing.processing_classificator import ApplicationClassificator
 from saxs.gaussian_processing.processing_outils import get_filenames_without_ext
 
@@ -87,7 +87,10 @@ class PeakApplication(ApplicationClassificator):
 
                 self.data[sample] = self.peak_classificator()
                 if isinstance(self.peak_classificator, RobustParabolePeakKernel):
-                    self.peak_numbers_by_sample.append(len(self.peak_classificator.peaks))
+                    self.peak_numbers_by_sample.append(len(self.peak_classificator.peaks)) # not correct
+                elif isinstance(self.peak_classificator, RobustParabolePeakKernelWithBackground):
+                    if self.peak_classificator.fitted_peak_params is not None and len(self.peak_classificator.fitted_peak_params[2:]) % 3 == 0:
+                        self.peak_numbers_by_sample.append(len(self.peak_classificator.fitted_peak_params[2:])//3)
             except Exception as e:
                 print(f"Error processing sample {sample}: {e}")
                 # self.data[sample] = {'error': str(e)}

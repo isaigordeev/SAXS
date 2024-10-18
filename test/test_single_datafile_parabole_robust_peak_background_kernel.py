@@ -8,9 +8,9 @@ from saxs.gaussian_processing.peak.peak_kernel.robust_parabole_kernel import Rob
 class SingleDatafileLabTest(unittest.TestCase):
 
     def setUp(self):
-        self.application = Manager(peak_data_path="test_processing_data/075776_treated_xye.csv" , peak_kernel=RobustParabolePeakKernelWithBackground, phase_kernel=DefaultPhaseKernel)
+        self.application = Manager(peak_data_path="test_processing_data/075773_treated_xye.csv" , peak_kernel=RobustParabolePeakKernelWithBackground, phase_kernel=DefaultPhaseKernel)
         self.application()
-        self.expected_peaks = 7
+        self.expected_peaks = 6
 
     def test_parabole_peak_kernel(self):
         peak_classificator = self.application.peak_application_instance.peak_classificator

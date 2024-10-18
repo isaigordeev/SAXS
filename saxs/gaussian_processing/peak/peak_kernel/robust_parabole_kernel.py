@@ -64,6 +64,9 @@ class RobustParabolePeakKernel(ParabolePeakKernel):
     def postprocessing(self):
         self.sum_gaussian_total_fit()
 
+    def peak_coordinates_fit_update(self):
+        self.peaks = (self.final_peaks/self.delta_q).astype(int)
+
     def gathering(self) -> dict:
         peak_number = len(self.peaks) if self.peaks is not None else -1
         print("peak found: ", peak_number)
@@ -197,7 +200,7 @@ class RobustParabolePeakKernelWithBackground(RobustParabolePeakKernel):
 
                     if middle_i > middle_i_plus_1:
                         self.peaks[i] = int(np.mean([self.peaks[i], self.peaks[i + 1]]))
-                        peaks_to_delete.append(i)  # Delete peak[i]
+                        peaks_to_delete.append(i)
                         peak_params_to_delete.extend(range(2 + 3 * i, 2 + 3 * i + 3))
                     else:
                         self.peaks[i] = int(np.mean([self.peaks[i], self.peaks[i + 1]]))
@@ -208,7 +211,47 @@ class RobustParabolePeakKernelWithBackground(RobustParabolePeakKernel):
             self.peaks = np.delete(self.peaks, peaks_to_delete)
             self.peak_params = np.delete(self.peak_params, peak_params_to_delete)
 
+    def final_plot_from_fitted_params(self, number=0):
+        plt.clf()
+        final_background = background_hyberbole(self.q_raw, self.fitted_peak_params[0],
+                                                self.fitted_peak_params[1])
+        plt.plot(self.q_raw, self.I_raw-final_background, label='raw_plot_without_fitback')
+        plt.plot(self.fitted_peak_params[2:][::3],
+                 self.fitted_peak_params[2:][1::3], 'rx', label='peaks_on_raw')
+        plt.plot(self.q_raw, self.zero_level, label='zero_level')
+        plt.legend()
+        plt.savefig("{}/final_plot_from_fitted_params_{}.pdf".format(self.file_analysis_dir, number))
+
     def postprocessing(self):
         self.gaussian_fit_troubleshoot()
         self.final_plot(1)
         self.sum_gaussian_and_background_total_fit()
+        self.final_plot_from_fitted_params()
+        # self.peak_coordinates_fit_update()
+
+    def gathering(self) -> dict:
+        peak_number = len(self.fitted_peak_params[2:])//3 if self.fitted_peak_params is not None and len(self.fitted_peak_params[2:]) % 3 == 0 else -1
+        print("peak found: ", peak_number,len(self.fitted_peak_params))
+
+        return {
+            'peak kernel method': self.class_info(),
+            'peak_number': peak_number,
+            'initial peak indices': self.peaks.tolist(),
+            'q': self.final_peaks,
+            # 'I': self.current_I_state[self.peaks].tolist(),
+            # 'kernel': self.str_type
+            # 'dI': dI.tolist(),
+            # 'I_raw': I_raw.tolist(),
+            # 'peaks': peaks_detected.tolist(),
+            'initial_params_amplitude': self.peak_params.tolist()[2:][::3],
+            'initial_params_mean': self.peak_params.tolist()[2:][1::3],
+            'initial_params_sigma': self.peak_params.tolist()[2:][2::3],
+
+            'fitted_params_amplitude': self.fitted_peak_params.tolist()[2:][::3],
+            'fitted_params_mean': self.fitted_peak_params.tolist()[2:][1::3],
+            'fitted_params_sigma': self.fitted_peak_params.tolist()[2:][2::3],
+            # 'start_loss': self.start_loss,
+            # 'final_loss': self.final_loss,
+            # 'error': error
+            # 'loss_ratio': self.final_loss / self.start_loss
+        }

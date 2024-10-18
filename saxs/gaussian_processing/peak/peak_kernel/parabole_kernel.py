@@ -238,6 +238,7 @@ class ParabolePeakKernel(ProminencePeakKernel):
 
         self.peaks = self.peaks_processed.astype(int)
 
+
     def relevant_search_peaks(self):
         pass
 
